@@ -17,10 +17,10 @@ function card(title,body,cls,kicker){return '<section class="card '+(cls||'')+'"
 function progress(p){return '<div class="progress-track"><div class="progress-fill" style="width:'+Math.max(0,Math.min(100,p))+'%"></div></div>'}
 function empty(title,desc){return '<div class="empty"><strong>'+title+'</strong>'+desc+'</div>'}
 let current='home',selectedDate=now(),requestedPage='home';
-const names={vault:['PRIVATE VAULT','プライベート保管庫'],home:['OVERVIEW','Overview'],plan:['STUDY PLAN','学習計画'],records:['STUDY LOG','学習記録'],review:['DAILY REVIEW','振り返り'],path:['FUTURE DESIGN','進路研究室'],strategy:['ADMISSION STRATEGY','進学戦略'],portfolio:['PROJECT PORTFOLIO','探究ポートフォリオ'],skills:['SKILL DEVELOPMENT','スキルマップ'],library:['PERSONAL LIBRARY','マイノート'],motivation:['MOTIVATION EDITOR','モチベ記事'],data:['DATA & BACKUP','データ管理']};
-function pageUrl(p){return '/NEXO/workspace/'+(p==='vault'?'vault':p)+'/'}
+const names={vault:['PRIVATE VAULT','プライベート保管庫'],home:['OVERVIEW','Overview'],plan:['STUDY PLAN','学習計画'],records:['STUDY LOG','学習記録'],review:['DAILY REVIEW','振り返り'],path:['FUTURE DESIGN','進路研究室'],strategy:['ADMISSION STRATEGY','進学戦略'],portfolio:['PROJECT PORTFOLIO','探究ポートフォリオ'],skills:['SKILL DEVELOPMENT','スキルマップ'],library:['PERSONAL LIBRARY','マイノート'],motivation:['MOTIVATION EDITOR','モチベ記事'],motivationPreview:['ARTICLE PREVIEW','記事プレビュー'],data:['DATA & BACKUP','データ管理']};
+function pageUrl(p){return '/NEXO/workspace/'+(p==='motivationPreview'?'motivation-preview':p)+'/'}
 function go(p){if(!names[p])return;current=p;requestedPage=p;history.pushState({page:p},'',pageUrl(p));$('#sidebar').classList.remove('open');render();window.scrollTo({top:0,behavior:'smooth'})}
-function pageFromPath(){const m=location.pathname.match(/\/NEXO\/workspace\/([^/]+)\//);return m&&names[m[1]]?m[1]:'home'}
+function pageFromPath(){const m=location.pathname.match(/\/NEXO\/workspace\/([^/]+)\//);if(!m)return 'home';const key=m[1]==='motivation-preview'?'motivationPreview':m[1];return names[key]?key:'home'}
 window.addEventListener('popstate',()=>{current=pageFromPath();requestedPage=current;render()});
 current=pageFromPath();requestedPage=current;
 document.querySelector('.nav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b){e.preventDefault();go(b.dataset.page)}});
@@ -28,7 +28,7 @@ $('#menuToggle').onclick=()=>$('#sidebar').classList.toggle('open');
 $('#themeToggle').onclick=()=>{db.theme=db.theme==='light'?'dark':'light';document.body.classList.toggle('light',db.theme==='light');save()};
 document.body.classList.toggle('light',db.theme==='light');
 $('#todayLabel').textContent=dateText(now());
-function render(){if(!syncToken()){if(current!=='vault')requestedPage=current;current='vault';document.body.classList.add('nexo-locked');$('#crumb').textContent='LOGIN';vault();return}document.body.classList.remove('nexo-locked');const meta=names[current];$('#crumb').textContent=meta[0];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===current));({home,plan,records,review,path,strategy,portfolio,skills,library,motivation,data,vault}[current])()}
+function render(){if(!syncToken()){if(current!=='vault')requestedPage=current;current='vault';document.body.classList.add('nexo-locked');$('#crumb').textContent='LOGIN';vault();return}document.body.classList.remove('nexo-locked');const meta=names[current];$('#crumb').textContent=meta[0];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===current));({home,plan,records,review,path,strategy,portfolio,skills,library,motivation,motivationPreview,data,vault}[current])()}
 function defaultMotivationArticles(){return [{"id":"kosen-exam-2027","category":"高専入試特集","title":"高専入試突破特集｜残り時間を、合格力に変える","lead":"目標は「なんとなく頑張る」ではなく、5教科の得点力と本番での再現性を仕上げること。","body":"2027年度の国立高専学力検査は、2027年2月14日（日）に実施予定。ここから本番までは、勉強量を増やすだけでなく「取れる問題を確実に取る力」を仕上げる期間だ。\n\nまず意識したいのは、数学・理科を得点源に育てながら、英語・国語・社会で失点を広げないこと。得意科目だけを解いていると安心感は得られるけれど、合格点を安定させるには5教科全体の穴を減らす必要がある。\n\n【毎日の軸】\n1. 数学：計算ミス、関数、図形、確率など、間違えた問題を「なぜ間違えたか」まで説明できるようにする。\n2. 理科：公式暗記だけで終わらせず、グラフ・実験条件・単位・現象の理由をセットで確認する。\n3. 英語：単語・文法を短時間でも毎日続け、長文は根拠となる英文に線を引いて答える。\n4. 国語：設問の条件を読み落とさず、本文のどこが根拠かを特定する。\n5. 社会：用語を単独で覚えるだけでなく、地図・資料・時代の流れと結びつける。\n\n【過去問の使い方】\n最初から点数だけを見ない。間違いを「知識不足」「解法が浮かばない」「読み違い」「計算・マークミス」に分類する。同じ種類のミスが続くなら、そこが次に伸ばす場所だ。解き直しは、答えを覚えている状態で終わらせず、数日後にもう一度、何も見ずに解けるか確認する。\n\n国立高専の学力検査ではマークシート方式が採用され、機構は思考力・判断力・表現力を重視した問題やサンプル問題も公開している。だから、答えだけを暗記するのではなく、条件を読み取り、図や表から情報を整理し、理由を考える練習が大切になる。\n\n【最後に】\n本番で必要なのは、天才的なひらめきではない。いつも通りに読み、いつも通りに考え、取るべき問題を落とさない力。今日の25分を積み重ねて、昨日の自分より一つだけ強くなろう。ここまで積み上げてきた数学の先取りも、模試で得た手応えも、ちゃんと武器になる。焦らず、でも止まらずに仕上げよう。","published":true,"updated":1794312348028,"sources":[{"label":"国立高専機構：入試基本情報","url":"https://www.kosen-k.go.jp/marksheet"},{"label":"国立高専機構：入試過去問","url":"https://www.kosen-k.go.jp/kosen_navi"}]},{"id":"keio-econ-a-route","category":"慶應A方式特集","title":"慶應経済A方式突破へ｜数学と英語を、長期的な武器にする","lead":"高専入試の先にある目標。数学と英語を磨き、理系の思考力と経済への関心をつなげる。","body":"ここでいうA方式は、慶應義塾大学・経済学部の一般選抜A方式を指す。2027年度の公式情報では、英語200点・数学200点の合計400点。英語と数学がそれぞれ100分で、数学は数学I・II・A・B・Cが範囲となり、数学Bは数列、数学Cはベクトルを含む。数学IIの微分・積分では一般の多項式を扱うとされている。\n\nこの方式で大切なのは、数学だけ、英語だけに偏らないこと。2科目が同じ配点だからこそ、片方の苦手を放置すると合計点が伸びにくい。数学は解法を理解したうえで、初見の問題に方針を立てる力を養う。英語は語彙・文法を土台に、長文を正確に読み、設問の根拠を追える力を育てる。\n\n【今から積み上げる順番】\n1. 数学の土台：中学範囲の穴をなくし、高校数学I・Aを確実に理解する。\n2. 数学の発展：数学II・B・Cへ進み、関数・数列・ベクトル・微積分の考え方をつなげる。\n3. 英語の基礎：単語・文法・英文解釈を積み重ね、長文を読む速度と精度を上げる。\n4. 記述と思考：答えだけでなく、なぜその方針を選んだかを短く説明する。\n5. 経済への接続：統計・確率・関数の見方を、実際の経済データや社会の動きに結びつける。\n\nただし、今の最優先は目の前の高専入試。慶應の対策を理由に、直近の5教科対策を崩す必要はない。高専入試までは中学範囲の完成と過去問分析を中心にし、合格後に高校数学・英語を本格的に積み上げていこう。\n\nもう一つ重要なのは、慶應経済A方式の一般選抜と、高専から大学への編入学は別の制度だということ。将来どのルートを使えるかは、志望学部・受験年度・出願資格によって変わる。A方式を学力目標として活用しつつ、実際に受験する年には必ず最新の公式募集要項を確認する。\n\n遠い目標を持つことは、今の勉強を意味あるものにする。数学で考え、英語で世界の情報を読み、経済で社会を理解する。その力を一つずつ身につけていこう。","published":true,"updated":1794312348028,"sources":[{"label":"慶應義塾大学：2027年度一般選抜","url":"https://www.keio.ac.jp/ja/admissions/faculty/examinations/general-admissions/"},{"label":"2027年度 試験教科・科目・配点","url":"https://www.keio.ac.jp/files/d76245e2bdc5e5a3f397c40b2ae40047b4d41cd3ea399c3b4dbf969c3ad989a7"}]}];}
 function ensureMotivationArticles(){if(!Array.isArray(db.motivationArticles))db.motivationArticles=[];if(!db.motivationArticles.length){db.motivationArticles=defaultMotivationArticles();save()}return db.motivationArticles;}
 function motivationPanel(){
@@ -215,7 +215,21 @@ function motivation(){
  '<div id="motivationReader"></div>';
  $('#newMotivation').onclick=()=>editor();
  app.querySelectorAll('[data-edit-article]').forEach(b=>b.onclick=()=>editor(b.dataset.editArticle));
- app.querySelectorAll('[data-read-article]').forEach(b=>b.onclick=()=>{const x=articles.find(a=>a.id===b.dataset.readArticle);if(!x)return;const box=$('#motivationReader');box.innerHTML='<article class="motivation-reader"><div class="eyebrow">'+esc(x.category)+'</div><h2>'+esc(x.title)+'</h2><p class="motivation-reader-lead">'+esc(x.lead)+'</p><div class="motivation-reader-body">'+esc(x.body)+'</div>'+(x.sources?.length?'<div class="source-links">'+x.sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.label)+' ↗</a>').join('')+'</div>':'')+'</article>';box.scrollIntoView({behavior:'smooth',block:'start'})});
+ app.querySelectorAll('[data-read-article]').forEach(b=>b.onclick=()=>openMotivationPreview(b.dataset.readArticle));
+}
+
+function openMotivationPreview(id){
+ current='motivationPreview';requestedPage='motivationPreview';
+ history.pushState({page:current},'',pageUrl(current)+'?id='+encodeURIComponent(id));
+ render();window.scrollTo({top:0,behavior:'smooth'});
+}
+function motivationPreview(){
+ const id=new URLSearchParams(location.search).get('id');
+ const item=ensureMotivationArticles().find(x=>String(x.id)===String(id));
+ if(!item){app.innerHTML=pageHead('ARTICLE PREVIEW','記事が見つかりません','記事データがこの端末・アカウントにありません。')+'<button class="btn" id="backMotivation">記事一覧へ戻る</button>';$('#backMotivation').onclick=()=>go('motivation');return;}
+ app.innerHTML=pageHead('ARTICLE PREVIEW','記事プレビュー','この記事専用のURLで表示しています。URLを保存すれば、このページに直接戻れます。','<button class="btn secondary" id="backMotivation">← 記事一覧</button>')+
+ '<article class="motivation-reader"><div class="eyebrow">'+esc(item.category)+'</div><h1>'+esc(item.title)+'</h1><p class="motivation-reader-lead">'+esc(item.lead)+'</p><div class="motivation-reader-body" style="white-space:pre-wrap">'+esc(item.body)+'</div>'+(item.sources?.length?'<div class="source-links">'+item.sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.label)+' ↗</a>').join('')+'</div>':'')+'</article>';
+ $('#backMotivation').onclick=()=>go('motivation');
 }
 function data(){
  app.innerHTML=pageHead('YOUR DATA, YOUR CONTROL','データ管理','入力したデータをバックアップ・復元できる。定期的に保存しておこう。')+
