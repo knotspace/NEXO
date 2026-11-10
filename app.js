@@ -25,14 +25,37 @@ $('#themeToggle').onclick=()=>{db.theme=db.theme==='light'?'dark':'light';docume
 document.body.classList.toggle('light',db.theme==='light');
 $('#todayLabel').textContent=dateText(now());
 function render(){if(!syncToken()){current='vault';document.body.classList.add('nexo-locked');$('#crumb').textContent='LOGIN';vault();return}document.body.classList.remove('nexo-locked');const meta=names[current];$('#crumb').textContent=meta[0];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===current));({home,plan,records,review,path,strategy,portfolio,skills,library,data,vault}[current])()}
+function motivationPanel(){
+ const dayKey=now().replace(/-/g,'').split('').reduce((n,c)=>n+Number(c),0);
+ const lines=[
+  '才能の差は、今日の25分では埋まらない。でも、今日の25分を積み重ねた人だけが、いつかその差をひっくり返す。',
+  '目標が大きいのはいいこと。今日やることまで大きくする必要はない。',
+  '昨日の自分に勝てばいい。比べる相手を間違えない。',
+  'わからない問題に出会った日は、伸びる余地を見つけた日。',
+  '遠い進路も、今日解いた一問からつながっている。',
+  '勉強は未来の選択肢を増やす投資。今の努力は、あとで自分を助ける。',
+  '完璧な計画より、始めた25分。気分が乗るのを待たずに始めよう。',
+  '数学で考え、情報で形にし、経済で社会を見る。その組み合わせを自分の武器にしよう。',
+  '結果が出ない日も、基礎は裏切らない。積み上げた分だけ、次の挑戦が楽になる。',
+  '本気で変わりたいなら、今日の自分に小さな約束をして、それを守ろう。'
+ ];
+ const today=minutesToday(),weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);
+ const weekKey=[weekStart.getFullYear(),String(weekStart.getMonth()+1).padStart(2,'0'),String(weekStart.getDate()).padStart(2,'0')].join('-');
+ const week=db.records.filter(x=>x.date>=weekKey);
+ const weekMins=week.reduce((n,x)=>n+Number(x.minutes||0),0);
+ const activeDays=new Set(week.map(x=>x.date)).size;
+ const next=planFor().find(x=>!x.done);
+ const mission=next?'まず「'+esc(next.name)+'」を'+Number(next.minutes||25)+'分。終わったらチェックを入れよう。':'まず25分だけ集中。終わったら今日の記録を残そう。';
+ return '<section class="motivation-hero"><div class="motivation-head"><span class="eyebrow">YOUR NEXT LEVEL STARTS TODAY</span><span class="motivation-date">'+dateText(now())+'</span></div><h2>その目標、ちゃんと狙いにいこう。</h2><p class="motivation-lead">中学数学を先取りして、模試の数学偏差値65まで伸ばした。ここまで来たのは、君が実際に手を動かしてきたから。次は数学・情報・経済をつなげて、自分だけの強みにしていこう。</p><blockquote class="motivation-quote">「'+lines[dayKey%lines.length]+'」</blockquote><div class="motivation-bottom"><div class="motivation-mission"><span class="eyebrow">TODAY'S FIRST MOVE</span><strong>'+mission+'</strong></div><div class="motivation-stats"><div><b>'+today+'</b><small>今日の分</small></div><div><b>'+weekMins+'</b><small>直近7日・分</small></div><div><b>'+activeDays+'<small>/7</small></b><small>学習した日</small></div></div></div><div class="btn-row"><button class="btn" data-go="plan">今日の一歩を始める →</button><button class="btn secondary" data-go="strategy">進路戦略を確認</button></div></section>';
+}
 function home(){
  const t=planFor(),done=t.filter(x=>x.done).length,pct=t.length?Math.round(done/t.length*100):0,mins=minutesToday(),all=totalMinutes();
  const recent=[...db.records].sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id)).slice(0,5);
  const week=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const key=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');const n=db.records.filter(x=>x.date===key).reduce((s,x)=>s+Number(x.minutes),0);return '<div class="day-chip '+(key===now()?'today':'')+'"><small>'+d.toLocaleDateString('ja-JP',{weekday:'short'})+'</small><b>'+d.getDate()+'</b><small>'+n+'分</small>'+(n?'<i class="dot"></i>':'')+'</div>'}).join('');
  const subjectTotals=['数学','英語','理科','社会','国語','情報・プログラミング','進路研究'].map(s=>({s,n:db.records.filter(x=>x.subject===s).reduce((a,x)=>a+Number(x.minutes),0)}));
  const max=Math.max(1,...subjectTotals.map(x=>x.n));
- app.innerHTML=pageHead('YOUR PERSONAL COMMAND CENTER','今日の積み重ねが、次の自分をつくる。','目標を細かく分けて、今日できることから進めよう。','<span class="heading-date">'+dateText(now())+'</span>')+
- '<div class="welcome-panel"><div class="eyebrow">MAKE TODAY COUNT</div><h2>急がなくていい。止まらずに進もう。</h2><p>完璧な一日より、昨日より一歩進めた一日を。</p></div>'+
+ app.innerHTML=pageHead('YOUR PERSONAL COMMAND CENTER','目標は大きく。今日の一歩は小さく。','積み上げた実力を、次の選択肢につなげていこう。','<span class="heading-date">'+dateText(now())+'</span>')+
+ motivationPanel()+
  '<div class="grid">'+
  card('TODAY STUDY','<div class="stat-number">'+mins+'<small> min</small></div><div class="stat-note">今日の学習時間</div>','span-3','TODAY')+
  card('TASK PROGRESS','<div class="stat-number">'+pct+'<small> %</small></div><div class="stat-note">'+done+' / '+t.length+' タスク完了</div>'+progress(pct),'span-3','CHECKLIST')+
