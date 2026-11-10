@@ -18,7 +18,11 @@ function progress(p){return '<div class="progress-track"><div class="progress-fi
 function empty(title,desc){return '<div class="empty"><strong>'+title+'</strong>'+desc+'</div>'}
 let current='home',selectedDate=now();
 const names={vault:['PRIVATE VAULT','プライベート保管庫'],home:['OVERVIEW','Overview'],plan:['STUDY PLAN','学習計画'],records:['STUDY LOG','学習記録'],review:['DAILY REVIEW','振り返り'],path:['FUTURE DESIGN','進路研究室'],strategy:['ADMISSION STRATEGY','進学戦略'],portfolio:['PROJECT PORTFOLIO','探究ポートフォリオ'],skills:['SKILL DEVELOPMENT','スキルマップ'],library:['PERSONAL LIBRARY','マイノート'],motivation:['MOTIVATION EDITOR','モチベ記事'],data:['DATA & BACKUP','データ管理']};
-function go(p){current=p;$('#sidebar').classList.remove('open');render();window.scrollTo({top:0,behavior:'smooth'})}
+function pageUrl(p){return '/NEXO/workspace/'+(p==='vault'?'vault':p)+'/'}
+function go(p){if(!names[p])return;current=p;history.pushState({page:p},'',pageUrl(p));$('#sidebar').classList.remove('open');render();window.scrollTo({top:0,behavior:'smooth'})}
+function pageFromPath(){const m=location.pathname.match(/\\/NEXO\\/workspace\\/([^/]+)\\//);return m&&names[m[1]]?m[1]:'home'}
+window.addEventListener('popstate',()=>{current=pageFromPath();render()});
+current=pageFromPath();
 document.querySelector('.nav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)go(b.dataset.page)});
 $('#menuToggle').onclick=()=>$('#sidebar').classList.toggle('open');
 $('#themeToggle').onclick=()=>{db.theme=db.theme==='light'?'dark':'light';document.body.classList.toggle('light',db.theme==='light');save()};
