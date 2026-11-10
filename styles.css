@@ -7,6 +7,12 @@ body.light .topbar{background:#ffffffdf}body.light .welcome-panel{background:rad
 
 /* Trigger first verified NEXO deployment after secret setup. */
 
+/* 全体ログイン画面 */
+body.nexo-locked .sidebar,body.nexo-locked .topbar,body.nexo-locked .footer{display:none!important}
+body.nexo-locked .main{margin-left:0;min-height:100vh}
+body.nexo-locked .page-wrap{width:min(620px,100%);min-height:100vh;display:flex;align-items:center;padding-top:32px;padding-bottom:32px}
+body.nexo-locked .page-heading{margin-bottom:20px}
+
 /* NEXO editorial workspace layout */
 .sidebar{position:sticky;inset:0 0 auto;width:100%;height:auto;min-height:76px;padding:14px clamp(18px,4vw,58px);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:28px;border-right:0;border-bottom:1px solid var(--line);z-index:20}
 .brand{padding:0;gap:11px;white-space:nowrap}.brand-mark{width:34px;height:34px;border-radius:9px}.brand strong{font-size:13px;letter-spacing:2px}.brand small{font-size:8px}

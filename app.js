@@ -24,7 +24,7 @@ $('#menuToggle').onclick=()=>$('#sidebar').classList.toggle('open');
 $('#themeToggle').onclick=()=>{db.theme=db.theme==='light'?'dark':'light';document.body.classList.toggle('light',db.theme==='light');save()};
 document.body.classList.toggle('light',db.theme==='light');
 $('#todayLabel').textContent=dateText(now());
-function render(){const meta=names[current];$('#crumb').textContent=meta[0];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===current));({home,plan,records,review,path,skills,library,data,vault}[current])()}
+function render(){if(!syncToken()){current='vault';document.body.classList.add('nexo-locked');$('#crumb').textContent='LOGIN';vault();return}document.body.classList.remove('nexo-locked');const meta=names[current];$('#crumb').textContent=meta[0];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===current));({home,plan,records,review,path,skills,library,data,vault}[current])()}
 function home(){
  const t=planFor(),done=t.filter(x=>x.done).length,pct=t.length?Math.round(done/t.length*100):0,mins=minutesToday(),all=totalMinutes();
  const recent=[...db.records].sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id)).slice(0,5);
@@ -102,19 +102,17 @@ function noteModal(id){
  if(id)$('#deleteNote').onclick=()=>{if(confirm('このノートを削除しますか？')){db.notes=db.notes.filter(x=>x.id!==id);save();backdrop.remove();library();toast('ノートを削除しました')}};
  $('#noteForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),item={id:id||Date.now(),title:f.get('title').trim(),category:f.get('category'),body:f.get('body').trim(),updated:Date.now()};if(id)db.notes=db.notes.map(x=>x.id===id?item:x);else db.notes.push(item);save();backdrop.remove();library();toast('ノートを保存しました')}
 }
-render();
-
 function data(){
  app.innerHTML=pageHead('YOUR DATA, YOUR CONTROL','データ管理','入力したデータをバックアップ・復元できる。定期的に保存しておこう。')+
  '<div class="grid">'+card('バックアップを書き出す','<p class="muted">学習計画・学習記録・振り返り・進路メモ・スキル・ノートをJSONファイルにまとめて保存する。</p><button class="btn" id="exportData">↓ バックアップをダウンロード</button>','span-6','EXPORT')+
  card('バックアップから復元','<p class="muted">以前に書き出したNEXOのJSONファイルを読み込む。読み込むと現在のデータは置き換わる。</p><div class="field"><label>バックアップファイル（JSON）</label><input type="file" id="importFile" accept="application/json,.json"></div><button class="btn" id="importData">バックアップを復元</button>','span-6','IMPORT')+
- card('保存場所とプライバシー','<p class="muted">このサイトは公開ページで、ログイン機能はありません。入力内容はこのブラウザのlocalStorageに保存され、サーバーには送信されません。別の端末とは同期されず、ブラウザのデータ削除で消える場合があります。共有端末では他の利用者に見られる可能性があるため、氏名・住所・学校名・パスワードなどの個人情報や機密情報は入力しないでください。</p><div class="tag orange">定期的なバックアップを推奨</div>','span-12','IMPORTANT')+'</div>';
+ card('保存場所とプライバシー','<p class="muted">NEXO全体は専用パスワードで保護されています。入力内容はこのブラウザにも保存され、認証後に暗号化してクラウド同期されます。別端末では同じパスワードでログインしてください。ブラウザのデータ削除や端末変更に備えて、定期的にバックアップを保存してください。パスワード・金融情報など、特に重要な秘密情報は入力しないでください。</p><div class="tag orange">定期的なバックアップを推奨</div>','span-12','IMPORTANT')+'</div>';
  $('#exportData').onclick=()=>{const payload={app:'NEXO',version:2,exportedAt:new Date().toISOString(),data:db};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='nexo-backup-'+now()+'.json';a.click();URL.revokeObjectURL(url);toast('バックアップを作成しました')};
  $('#importData').onclick=async()=>{const file=$('#importFile').files[0];if(!file){toast('先にJSONファイルを選択してください');return}try{const parsed=JSON.parse(await file.text());const incoming=parsed.data||parsed;if(!incoming||typeof incoming!=='object'||!incoming.plans||!Array.isArray(incoming.records)||!incoming.reviews||!Array.isArray(incoming.notes)||!incoming.skills)throw new Error('invalid');if(!confirm('現在のデータをバックアップ内容で置き換えます。続けますか？'))return;db={...blank(),...incoming};save();toast('バックアップを復元しました');setTimeout(()=>go('home'),500)}catch(e){toast('ファイルを読み込めませんでした。形式を確認してください')}};
 }
 
 
-// NEXO private vault + encrypted cross-device sync
+// NEXO全体のパスワード保護 + 暗号化クロスデバイス同期
 const NEXO_SYNC_API = 'https://steep-mountain-6450.orbit-lab-a.workers.dev';
 const NEXO_TOKEN_KEY = 'nexo-sync-session-v1';
 let syncTimer = null;
@@ -159,8 +157,8 @@ save = function(){
 function vault(){
   const token = syncToken();
   if(!token){
-    app.innerHTML = pageHead('PRIVATE VAULT','プライベート保管庫','個人用メモをパスワードで保護し、端末間で同期する。') +
-      '<div class="grid"><section class="card span-6"><div class="card-head"><h2 class="card-title">本人確認</h2><span class="card-kicker">FIRST-TIME SETUP</span></div><p class="muted">設定した専用パスワードを入力してください。一度認証すると、この端末では次回以降の入力を省略します。</p><form id="vaultLogin"><div class="field"><label>保護用パスワード</label><input name="password" type="password" autocomplete="current-password" required maxlength="256"></div><button class="btn">認証して開く</button><p class="muted" id="vaultError" role="status"></p></form></section></div>';
+    app.innerHTML = pageHead('NEXO ACCESS','NEXOにログイン','このワークスペース全体をパスワードで保護しています。') +
+      '<div class="grid"><section class="card span-6"><div class="card-head"><h2 class="card-title">ログイン</h2><span class="card-kicker">PRIVATE WORKSPACE</span></div><p class="muted">専用パスワードを入力してください。一度認証すると、この端末では次回以降の入力を省略します。</p><form id="vaultLogin"><div class="field"><label>保護用パスワード</label><input name="password" type="password" autocomplete="current-password" required maxlength="256"></div><button class="btn">認証して開く</button><p class="muted" id="vaultError" role="status"></p></form></section></div>';
     $('#vaultLogin').onsubmit=async e=>{
       e.preventDefault();
       const button=e.target.querySelector('button'); button.disabled=true;
@@ -170,7 +168,8 @@ function vault(){
         localStorage.setItem(NEXO_TOKEN_KEY,result.token);
         await pullCloudData();
         toast('認証しました');
-        vault();
+        current='home';
+        render();
       }catch(error){$('#vaultError').textContent=error.message;localStorage.removeItem(NEXO_TOKEN_KEY)}
       finally{button.disabled=false}
     };
@@ -180,12 +179,14 @@ function vault(){
   app.innerHTML = pageHead('PRIVATE VAULT','プライベート保管庫','ここに保存した内容は暗号化して同期する。') +
     '<div class="grid"><section class="card span-8"><div class="card-head"><h2 class="card-title">個人用メモ</h2><span class="card-kicker">ENCRYPTED SYNC</span></div><p class="muted">必要な記録だけを保存してね。パスワードや金融情報など、特に重要な秘密情報の保存は避けてください。</p><div class="field"><label>プライベートメモ</label><textarea id="vaultNotes" style="min-height:260px" placeholder="個人用の記録・目標・非公開メモなど">'+esc(db.vaultNotes)+'</textarea></div><div class="btn-row"><button class="btn" id="saveVault">保存・同期</button><button class="btn secondary" id="vaultLogout">この端末の認証を解除</button></div><p class="muted" data-sync-status>認証済み・同期待機中</p></section></div>';
   $('#saveVault').onclick=()=>{db.vaultNotes=$('#vaultNotes').value;save();toast('保存を開始しました')};
-  $('#vaultLogout').onclick=()=>{localStorage.removeItem(NEXO_TOKEN_KEY);toast('この端末の認証を解除しました');vault()};
-  if(!window.__nexoVaultAutoPulled){
-    window.__nexoVaultAutoPulled=true;
-    pullCloudData().then(()=>{if(current==='vault') vault()}).catch(error=>{
-      localStorage.removeItem(NEXO_TOKEN_KEY);
-      if(current==='vault') vault();
-    });
-  }
+  $('#vaultLogout').onclick=()=>{localStorage.removeItem(NEXO_TOKEN_KEY);current='vault';toast('NEXO全体をロックしました');render()};
 }
+
+// 起動時にサーバーで認証状態を確認してから画面を表示する
+async function bootNexo(){
+  if(!syncToken()){current='vault';render();return}
+  app.innerHTML='<div class="empty"><strong>NEXOを確認中...</strong>安全な接続を確認しています。</div>';
+  try{await pullCloudData();document.body.classList.remove('nexo-locked');render()}
+  catch(error){localStorage.removeItem(NEXO_TOKEN_KEY);current='vault';render()}
+}
+bootNexo();
