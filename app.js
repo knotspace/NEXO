@@ -2,7 +2,7 @@ const STORE='project-next-v2';
 const $=s=>document.querySelector(s);
 const app=$('#app');
 const now=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
-const blank=()=>({plans:{},records:[],reviews:{},notes:[],skills:{},pathNotes:'',theme:'dark'});
+const blank=()=>({plans:{},records:[],reviews:{},notes:[],skills:{},pathNotes:'',strategyNotes:'',strategyMilestones:{},projects:[],theme:'dark'});
 let db;try{db={...blank(),...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch(e){db=blank()}
 if(!localStorage.getItem(STORE)){try{const old=JSON.parse(localStorage.getItem('project-next-data')||'null');if(old){db.plans=old.plans||{};db.records=(old.records||[]).map((x,i)=>({...x,id:x.id||Date.now()+i,memo:x.memo||''}));db.reviews=old.reviews||{};db.pathNotes=localStorage.getItem('pn-memo')||'';save()}}catch(e){}}
 function save(){localStorage.setItem(STORE,JSON.stringify(db))}
@@ -17,14 +17,14 @@ function card(title,body,cls,kicker){return '<section class="card '+(cls||'')+'"
 function progress(p){return '<div class="progress-track"><div class="progress-fill" style="width:'+Math.max(0,Math.min(100,p))+'%"></div></div>'}
 function empty(title,desc){return '<div class="empty"><strong>'+title+'</strong>'+desc+'</div>'}
 let current='home',selectedDate=now();
-const names={vault:['PRIVATE VAULT','プライベート保管庫'],home:['OVERVIEW','Overview'],plan:['STUDY PLAN','学習計画'],records:['STUDY LOG','学習記録'],review:['DAILY REVIEW','振り返り'],path:['FUTURE DESIGN','進路研究室'],skills:['SKILL DEVELOPMENT','スキルマップ'],library:['PERSONAL LIBRARY','マイノート'],data:['DATA & BACKUP','データ管理']};
+const names={vault:['PRIVATE VAULT','プライベート保管庫'],home:['OVERVIEW','Overview'],plan:['STUDY PLAN','学習計画'],records:['STUDY LOG','学習記録'],review:['DAILY REVIEW','振り返り'],path:['FUTURE DESIGN','進路研究室'],strategy:['ADMISSION STRATEGY','進学戦略'],portfolio:['PROJECT PORTFOLIO','探究ポートフォリオ'],skills:['SKILL DEVELOPMENT','スキルマップ'],library:['PERSONAL LIBRARY','マイノート'],data:['DATA & BACKUP','データ管理']};
 function go(p){current=p;$('#sidebar').classList.remove('open');render();window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelector('.nav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)go(b.dataset.page)});
 $('#menuToggle').onclick=()=>$('#sidebar').classList.toggle('open');
 $('#themeToggle').onclick=()=>{db.theme=db.theme==='light'?'dark':'light';document.body.classList.toggle('light',db.theme==='light');save()};
 document.body.classList.toggle('light',db.theme==='light');
 $('#todayLabel').textContent=dateText(now());
-function render(){if(!syncToken()){current='vault';document.body.classList.add('nexo-locked');$('#crumb').textContent='LOGIN';vault();return}document.body.classList.remove('nexo-locked');const meta=names[current];$('#crumb').textContent=meta[0];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===current));({home,plan,records,review,path,skills,library,data,vault}[current])()}
+function render(){if(!syncToken()){current='vault';document.body.classList.add('nexo-locked');$('#crumb').textContent='LOGIN';vault();return}document.body.classList.remove('nexo-locked');const meta=names[current];$('#crumb').textContent=meta[0];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===current));({home,plan,records,review,path,strategy,portfolio,skills,library,data,vault}[current])()}
 function home(){
  const t=planFor(),done=t.filter(x=>x.done).length,pct=t.length?Math.round(done/t.length*100):0,mins=minutesToday(),all=totalMinutes();
  const recent=[...db.records].sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id)).slice(0,5);
@@ -80,6 +80,43 @@ function path(){
  card('調査するときのチェックポイント','<div class="skill-group"><h3>入試制度</h3><p class="muted">募集要項の年度／出願資格／必要書類／試験科目・配点／募集人数／出願期間</p></div><div class="skill-group"><h3>編入制度</h3><p class="muted">編入年次／対象者／修得単位／専門科目／英語要件／過去の実施状況</p></div><div class="skill-group"><h3>学び・進路</h3><p class="muted">授業内容／研究室／卒業研究／大学院進学／卒業後の職種</p></div><div class="tag orange">制度は年度によって変更される可能性あり</div>','span-12','RESEARCH CHECKLIST')+'</div>';
  $('#savePath').onclick=()=>{db.pathNotes=$('#pathMemo').value;save();toast('調査メモを保存しました')}
 }
+function strategy(){
+ const milestones=[
+  ['基礎学力','高校数学I・Aを先取りし、計算・関数・場合の数を盤石にする'],
+  ['数学の発展','数学II・B・Cから微積分・線形代数・確率統計へつなげる'],
+  ['英語資格','準2級から2級、その先の長文読解・アカデミック英語へ'],
+  ['情報技術','Pythonを使ったデータ処理、アルゴリズム、C/C++、SQLを学ぶ'],
+  ['理系×経済','ミクロ・マクロ経済学、統計学、計量経済学、ファイナンスを学ぶ'],
+  ['探究実績','学んだ数学・情報・経済を組み合わせた作品を1つ完成させる'],
+  ['制度の確認','志望先ごとの出願資格・編入年次・試験科目を公式要項で確認する']
+ ];
+ const done=milestones.filter(x=>db.strategyMilestones[x[0]]).length;
+ const milestoneHtml=milestones.map(x=>'<label class="skill-item"><input class="check" type="checkbox" data-strategy-milestone="'+esc(x[0])+'" '+(db.strategyMilestones[x[0]]?'checked':'')+'><span class="row-main"><span class="row-title">'+esc(x[0])+'</span><span class="row-sub">'+esc(x[1])+'</span></span></label>').join('');
+ const sources='<div class="source-links"><a href="https://www.students.keio.ac.jp/com/career/placement/trans.html" target="_blank" rel="noopener">慶應公式：第2学年編入学</a><a href="https://www.students.keio.ac.jp/com/career/placement/bachelor.html" target="_blank" rel="noopener">慶應公式：学士入学</a><a href="https://www.keio.ac.jp/ja/admissions/faculty/examinations/" target="_blank" rel="noopener">慶應公式：入試制度一覧</a><a href="https://www.mext.go.jp/a_menu/koutou/shikaku/07111315.htm" target="_blank" rel="noopener">文科省：大学への編入学</a></div>';
+ app.innerHTML=pageHead('YOUR ADMISSION STRATEGY','進学戦略','進学ルートを現実的に比較し、今やるべきことに落とし込む。')+
+ '<div class="strategy-hero"><div class="eyebrow">LONG-TERM VISION</div><h2>情報・数学を武器に、経済・金融まで扱える人材へ。</h2><p>学校名だけで進路を決めず、学べる内容・制度・費用・卒業後の選択肢を比較する。慶應を含む大学進学も、複数のルートで検討する。</p></div>'+
+ '<div class="grid">'+
+ card('進路ルートの現状','<div class="route-item"><span class="tag green">有力な選択肢</span><h3>高専卒業後の大学3年次編入</h3><p>高専卒業者は制度上、大学編入学の対象になり得る。ただし大学・学部ごとに受験資格、試験科目、編入年次が異なる。志望校ごとの募集要項で確認する。</p></div><div class="route-item"><span class="tag orange">要確認・重要</span><h3>慶應への外部編入</h3><p>現行の慶應公式案内では、第2学年編入は学内対象。学士入学も慶應の学部卒業者等が対象として案内されている。高専からの外部編入ルートとして前提にせず、制度変更を毎年確認する。</p></div><div class="route-item"><span class="tag">別ルート</span><h3>慶應の一般選抜・各種入試</h3><p>高校卒業等の出願資格を満たす場合の直接受験ルート。学部ごとの科目・方式を確認し、数学・英語・理科などの基礎を長期で積み上げる。</p></div><div class="route-item"><span class="tag">探究型</span><h3>慶應理工・分野志向型など</h3><p>研究・制作・探究の実績を育てる選択肢。対象年度の出願資格を必ず確認し、今は作品と学びの記録を積み上げる。</p></div>','span-7','ROUTE REALITY CHECK')+
+ card('進路判断のルール','<ol class="strategy-list"><li>「行けそう」ではなく公式要項で出願資格を確認する</li><li>編入年次・単位認定・卒業までの年数を比較する</li><li>入試科目と現在の学力差から必要な勉強を逆算する</li><li>第一志望だけでなく、学びの近い代替ルートも確保する</li><li>制度の情報には対象年度と確認日を必ず付ける</li></ol><div class="tag orange">入試制度は年度ごとに更新される</div>','span-5','DECISION RULES')+
+ card('長期アクションチェックリスト','<div class="progress-meta"><span>'+done+' / '+milestones.length+' 項目</span><b>'+Math.round(done/milestones.length*100)+'%</b></div>'+progress(done/milestones.length*100)+'<div class="list">'+milestoneHtml+'</div>','span-6','STRATEGY TRACKER')+
+ card('公式情報へのリンク','<p class="muted">慶應の編入制度は学内対象の区分があるため、外部からの進学可能性を混同しない。毎年、最新の募集要項で再確認する。</p>'+sources,'span-6','PRIMARY SOURCES')+
+ card('自分の進学メモ','<p class="muted">気になる大学・学部、入試方式、必要科目、疑問点、調査した日付を記録。</p><div class="field"><textarea id="strategyMemo" style="min-height:190px" placeholder="候補校：\n学びたい分野：\n入試・編入方式：\n出願資格の確認：\n必要科目・単位：\n公式URL／確認日：\n次に調べること：">'+esc(db.strategyNotes||'')+'</textarea></div><button class="btn" id="saveStrategy">戦略メモを保存</button>','span-12','PRIVATE RESEARCH NOTES')+'</div>';
+ app.querySelectorAll('[data-strategy-milestone]').forEach(el=>el.onchange=()=>{db.strategyMilestones[el.dataset.strategyMilestone]=el.checked;save();strategy()});
+ $('#saveStrategy').onclick=()=>{db.strategyNotes=$('#strategyMemo').value;save();toast('進学戦略を保存しました')};
+}
+function portfolio(){
+ const items=db.projects||[];
+ app.innerHTML=pageHead('BUILD PROOF OF YOUR CURIOSITY','探究ポートフォリオ','学んだことを作品・分析・文章にして、成長の証拠を残す。')+
+ '<div class="strategy-hero"><div class="eyebrow">MAKE SOMETHING REAL</div><h2>数学 × 情報 × 経済を、自分のプロジェクトにする。</h2><p>完成した作品だけでなく、仮説・失敗・改善・使った技術も記録。進路選択や将来の面接で、自分の言葉で説明できる経験を増やす。</p></div>'+
+ '<div class="grid">'+
+ card('プロジェクトを追加','<form id="projectForm"><div class="form-grid"><div class="field"><label>プロジェクト名</label><input name="title" maxlength="80" required placeholder="例：身近なデータの統計分析"></div><div class="field"><label>分野</label><select name="category"><option>情報・プログラミング</option><option>数学・統計</option><option>経済・金融</option><option>理系×経済</option><option>文章・研究</option><option>その他</option></select></div></div><div class="field"><label>目的・問い</label><textarea name="description" maxlength="1200" required placeholder="何を明らかにしたい？誰のどんな課題を解決する？"></textarea></div><div class="form-grid"><div class="field"><label>使用技術・教材</label><input name="tools" maxlength="180" placeholder="Python / Excel / 書籍など"></div><div class="field"><label>ステータス</label><select name="status"><option>アイデア</option><option>進行中</option><option>完成</option><option>改善中</option></select></div></div><button class="btn">＋ プロジェクトを登録</button></form>','span-6','NEW PROJECT')+
+ card('ポートフォリオの作り方','<div class="timeline"><div class="timeline-item"><h4>01 — 問いを決める</h4><p>自分が気になる現象を、調べられる具体的な問いにする。</p></div><div class="timeline-item"><h4>02 — 数学・情報で分析する</h4><p>データを集め、可視化・統計・プログラムで検証する。</p></div><div class="timeline-item"><h4>03 — 結果と限界を書く</h4><p>結論だけでなく、仮定・誤差・うまくいかなかった点も残す。</p></div><div class="timeline-item"><h4>04 — 公開できる形に整える</h4><p>個人情報や秘密情報を除き、README・図表・解説をまとめる。</p></div></div>','span-6','PROJECT METHOD')+
+ card('登録したプロジェクト','<div id="projectList"></div>','span-12','YOUR WORK')+'</div>';
+ const draw=()=>{$('#projectList').innerHTML=items.length?'<div class="project-grid">'+[...items].sort((a,b)=>b.updated-a.updated).map(p=>'<article class="project-card"><div class="card-head"><span class="tag">'+esc(p.category)+'</span><span class="card-kicker">'+esc(p.status)+'</span></div><h3>'+esc(p.title)+'</h3><p>'+esc(p.description)+'</p><div class="project-tools">'+esc(p.tools||'使用技術未設定')+'</div><button class="btn danger small" data-project-del="'+p.id+'">削除</button></article>').join('')+'</div>':empty('まだプロジェクトがありません','小さな分析やプログラムから始めてみよう。');$('#projectList').querySelectorAll('[data-project-del]').forEach(b=>b.onclick=()=>{if(confirm('このプロジェクトを削除しますか？')){db.projects=db.projects.filter(p=>p.id!==Number(b.dataset.projectDel));save();portfolio()}})};
+ draw();
+ $('#projectForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);db.projects.push({id:Date.now(),title:f.get('title').trim(),category:f.get('category'),description:f.get('description').trim(),tools:f.get('tools').trim(),status:f.get('status'),updated:Date.now()});save();portfolio();toast('プロジェクトを登録しました')};
+}
+
 const skillGroups={'数学':['中学数学の総復習','高校数学Ⅰ・A','高校数学Ⅱ・B・C','微分積分','線形代数','確率・統計','最適化・数値計算'],'情報・AI':['Python基礎','データ構造・アルゴリズム','C / C++','データベース・SQL','機械学習','深層学習','データ分析プロジェクト'],'経済・金融':['ミクロ経済学','マクロ経済学','統計学・計量経済学','ファイナンス理論','時系列分析','金融工学・リスク管理'],'英語・発信':['英文読解','英語資格・リスニング','技術文書を読む','分析結果を文章にする','プレゼンテーション']};
 function skills(){
  const all=Object.values(skillGroups).flat(),done=all.filter(x=>db.skills[x]).length,pct=Math.round(done/all.length*100);
