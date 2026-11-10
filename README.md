@@ -21,6 +21,8 @@ A personal learning workspace for planning, tracking, and reflecting on daily st
 4. Wait for the Pages deployment to finish.
 
 ## Privacy
-This is a static frontend. Study records and notes are stored in the browser's localStorage; they are not uploaded to a server or synced across devices. Clearing browser data may erase them, so use the JSON backup feature regularly.
 
-**Important:** Because the site is public, its HTML, CSS, and JavaScript can be viewed by anyone. Do not enter passwords, secrets, or highly sensitive information. Browser-local storage is not an authentication or access-control system.
+- The app shell is hosted as a public-facing static frontend; HTML, CSS and JavaScript can be viewed by anyone.
+- Personal notes and workspace data are fetched only after server-side authentication through the sync API. Keep credentials and personal details out of hard-coded frontend defaults.
+- Search indexing is disabled for the workspace pages, but `noindex` is not access control.
+- Never treat browser storage, hidden UI elements, or a public repository as a secure place for passwords or confidential records.
