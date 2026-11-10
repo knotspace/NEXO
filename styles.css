@@ -34,6 +34,20 @@ body.nexo-locked .page-heading{margin-bottom:20px}
 @media(max-width:900px){.project-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.strategy-hero{padding:21px}.strategy-hero h2{font-size:18px}.project-grid{grid-template-columns:1fr}}
 
+/* University strategy and personal advice */
+.route-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.route-card{padding:16px;border:1px solid var(--line);border-radius:13px;background:var(--surface2);min-width:0}
+.route-card h3{font-size:15px;margin:10px 0 3px}
+.route-card p{font-size:11px;color:var(--muted);line-height:1.8}
+.route-card .card-head a{font-size:10px;color:var(--accent);text-decoration:none}
+.route-focus{font-size:11px;color:var(--accent);font-weight:650}
+.route-fit{font-size:11px;padding-top:9px;border-top:1px solid var(--line);line-height:1.8}
+.advice-panel{padding:17px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
+.advice-panel h3{font-size:15px;margin:8px 0}
+.advice-panel p,.advice-next{font-size:11px;line-height:1.8;color:var(--muted)}
+.advice-next{margin-top:10px;padding:10px;border-radius:9px;background:var(--surface);color:var(--text)}
+@media(max-width:650px){.route-grid{grid-template-columns:1fr}}
+
 /* NEXO editorial workspace layout */
 .sidebar{position:sticky;inset:0 0 auto;width:100%;height:auto;min-height:76px;padding:14px clamp(18px,4vw,58px);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:28px;border-right:0;border-bottom:1px solid var(--line);z-index:20}
 .brand{padding:0;gap:11px;white-space:nowrap}.brand-mark{width:34px;height:34px;border-radius:9px}.brand strong{font-size:13px;letter-spacing:2px}.brand small{font-size:8px}
