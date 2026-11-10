@@ -48,6 +48,31 @@ body.nexo-locked .page-heading{margin-bottom:20px}
 .advice-next{margin-top:10px;padding:10px;border-radius:9px;background:var(--surface);color:var(--text)}
 @media(max-width:650px){.route-grid{grid-template-columns:1fr}}
 
+
+/* Personalized motivation dashboard */
+.motivation-hero{padding:27px 29px;border:1px solid #3b5271;border-radius:19px;background:radial-gradient(ellipse at 88% 4%,#5578aa55,transparent 43%),linear-gradient(125deg,#1b2d46,#101a29 78%);margin-bottom:17px;box-shadow:0 18px 45px #0003;position:relative;overflow:hidden}
+.motivation-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.motivation-date{font-size:10px;color:#8fa5c3}
+.motivation-hero h2{font-size:clamp(22px,3vw,31px);letter-spacing:-.7px;line-height:1.35;margin:14px 0 9px;position:relative;z-index:1}
+.motivation-lead{max-width:780px;font-size:12px;line-height:1.9;color:#c0cde0;margin:0}
+.motivation-quote{margin:18px 0;padding:13px 16px;border-left:2px solid #9dbcf0;background:#ffffff08;color:#e3edff;font-size:12px;line-height:1.9;border-radius:0 10px 10px 0}
+.motivation-bottom{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;align-items:stretch;margin-top:15px}
+.motivation-mission{padding:14px;border:1px solid #405674;border-radius:12px;background:#0c1726a8;display:flex;flex-direction:column;gap:8px}
+.motivation-mission strong{font-size:12px;line-height:1.8}
+.motivation-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.motivation-stats>div{padding:13px 9px;border:1px solid #344861;border-radius:12px;background:#ffffff08;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.motivation-stats b{font-size:22px;letter-spacing:-.5px}
+.motivation-stats b small{font-size:11px;color:#9db5d6}
+.motivation-stats small{font-size:9px;color:#9aacc5;margin-top:3px}
+.motivation-hero .btn-row{margin-top:15px}
+body.light .motivation-hero{background:radial-gradient(ellipse at 88% 4%,#c4d8f566,transparent 43%),linear-gradient(125deg,#eaf1fc,#f7f9fd 78%);border-color:#c9d7e9}
+body.light .motivation-hero h2{color:#1d2c42}
+body.light .motivation-lead{color:#566b87}
+body.light .motivation-quote{color:#304766;background:#e4edf9}
+body.light .motivation-mission,body.light .motivation-stats>div{background:#f5f8fd;border-color:#d3deed}
+body.light .motivation-stats b{color:#243d60}
+@media(max-width:650px){.motivation-hero{padding:21px 18px}.motivation-bottom{grid-template-columns:1fr}.motivation-stats b{font-size:19px}.motivation-hero h2{font-size:22px}}
+
 /* NEXO editorial workspace layout */
 .sidebar{position:sticky;inset:0 0 auto;width:100%;height:auto;min-height:76px;padding:14px clamp(18px,4vw,58px);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:28px;border-right:0;border-bottom:1px solid var(--line);z-index:20}
 .brand{padding:0;gap:11px;white-space:nowrap}.brand-mark{width:34px;height:34px;border-radius:9px}.brand strong{font-size:13px;letter-spacing:2px}.brand small{font-size:8px}
