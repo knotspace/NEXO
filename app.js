@@ -81,28 +81,57 @@ function path(){
  $('#savePath').onclick=()=>{db.pathNotes=$('#pathMemo').value;save();toast('調査メモを保存しました')}
 }
 function strategy(){
+ const routes=[
+  {name:'一橋大学',focus:'社会科学 × データサイエンス',route:'ソーシャル・データサイエンス学部で高専編入を実施。2027年度から開始、原則2年次編入（単位認定により3年次の場合あり）。書類審査と口頭試問。',fit:'数学・情報に加え、経済・社会課題への関心を作品や志望理由で示すルート。',url:'https://www.sds.hit-u.ac.jp/admission/kosen/',tag:'高専編入あり'},
+  {name:'東京科学大学',focus:'理工系・情報理工',route:'学士課程編入で情報理工学院の情報工学系は3年次相当、数理・計算科学系は2年次相当など。2027年度から英語は外部試験スコア評価。',fit:'情報系を専門的に深めたい場合の有力候補。数学・専門科目と英語資格を早めに準備。',url:'https://admissions.isct.ac.jp/ja/013/undergraduate/entrance-examination/se-transfer',tag:'高専編入あり'},
+  {name:'東京大学',focus:'工学部・研究志向',route:'他大学からの一般的な途中年次編入は実施していないが、工学部は高専卒業者を対象に若干名の編入を認める。学部・学科への直接照会が必要。',fit:'高専からの進学ルートは工学部に限定して慎重に調査。過去問請求・専門科目対策が重要。',url:'https://www.t.u-tokyo.ac.jp/study-at-utokyo/foe/transfer',tag:'工学部・若干名'},
+  {name:'早稲田大学',focus:'理工系・学際領域',route:'学士入学・編入は学部ごとに実施状況が異なる。2027年度は基幹理工学部で3年次編入を募集するが、2027年度を最後に募集停止予定。',fit:'学部別要項を必ず確認。募集停止年度・出願資格を見落とさず、対象学部と日程を早めに絞る。',url:'https://www.waseda.jp/inst/admission/undergraduate/application/transfer/',tag:'学部別・年度限定'},
+  {name:'慶應義塾大学',focus:'理工・経済・商・SFCなど',route:'第2学年編入は学内のみ。学士入学も原則学内対象。高専からの外部編入を前提にせず、一般選抜等の出願資格を確認する。',fit:'直接受験など別ルートの出願資格・科目を調べる。大学名だけでなく学びたい学部・研究内容を明確にする。',url:'https://www.keio.ac.jp/ja/admissions/faculty/examinations/',tag:'外部編入は要注意'}
+ ];
  const milestones=[
   ['基礎学力','高校数学I・Aを先取りし、計算・関数・場合の数を盤石にする'],
   ['数学の発展','数学II・B・Cから微積分・線形代数・確率統計へつなげる'],
   ['英語資格','準2級から2級、その先の長文読解・アカデミック英語へ'],
   ['情報技術','Pythonを使ったデータ処理、アルゴリズム、C/C++、SQLを学ぶ'],
   ['理系×経済','ミクロ・マクロ経済学、統計学、計量経済学、ファイナンスを学ぶ'],
-  ['探究実績','学んだ数学・情報・経済を組み合わせた作品を1つ完成させる'],
+  ['探究実績','数学・情報・経済を組み合わせた作品を完成させる'],
   ['制度の確認','志望先ごとの出願資格・編入年次・試験科目を公式要項で確認する']
  ];
  const done=milestones.filter(x=>db.strategyMilestones[x[0]]).length;
  const milestoneHtml=milestones.map(x=>'<label class="skill-item"><input class="check" type="checkbox" data-strategy-milestone="'+esc(x[0])+'" '+(db.strategyMilestones[x[0]]?'checked':'')+'><span class="row-main"><span class="row-title">'+esc(x[0])+'</span><span class="row-sub">'+esc(x[1])+'</span></span></label>').join('');
- const sources='<div class="source-links"><a href="https://www.students.keio.ac.jp/com/career/placement/trans.html" target="_blank" rel="noopener">慶應公式：第2学年編入学</a><a href="https://www.students.keio.ac.jp/com/career/placement/bachelor.html" target="_blank" rel="noopener">慶應公式：学士入学</a><a href="https://www.keio.ac.jp/ja/admissions/faculty/examinations/" target="_blank" rel="noopener">慶應公式：入試制度一覧</a><a href="https://www.mext.go.jp/a_menu/koutou/shikaku/07111315.htm" target="_blank" rel="noopener">文科省：大学への編入学</a></div>';
- app.innerHTML=pageHead('YOUR ADMISSION STRATEGY','進学戦略','進学ルートを現実的に比較し、今やるべきことに落とし込む。')+
- '<div class="strategy-hero"><div class="eyebrow">LONG-TERM VISION</div><h2>情報・数学を武器に、経済・金融まで扱える人材へ。</h2><p>学校名だけで進路を決めず、学べる内容・制度・費用・卒業後の選択肢を比較する。慶應を含む大学進学も、複数のルートで検討する。</p></div>'+
- '<div class="grid">'+
- card('進路ルートの現状','<div class="route-item"><span class="tag green">有力な選択肢</span><h3>高専卒業後の大学3年次編入</h3><p>高専卒業者は制度上、大学編入学の対象になり得る。ただし大学・学部ごとに受験資格、試験科目、編入年次が異なる。志望校ごとの募集要項で確認する。</p></div><div class="route-item"><span class="tag orange">要確認・重要</span><h3>慶應への外部編入</h3><p>現行の慶應公式案内では、第2学年編入は学内対象。学士入学も慶應の学部卒業者等が対象として案内されている。高専からの外部編入ルートとして前提にせず、制度変更を毎年確認する。</p></div><div class="route-item"><span class="tag">別ルート</span><h3>慶應の一般選抜・各種入試</h3><p>高校卒業等の出願資格を満たす場合の直接受験ルート。学部ごとの科目・方式を確認し、数学・英語・理科などの基礎を長期で積み上げる。</p></div><div class="route-item"><span class="tag">探究型</span><h3>慶應理工・分野志向型など</h3><p>研究・制作・探究の実績を育てる選択肢。対象年度の出願資格を必ず確認し、今は作品と学びの記録を積み上げる。</p></div>','span-7','ROUTE REALITY CHECK')+
- card('進路判断のルール','<ol class="strategy-list"><li>「行けそう」ではなく公式要項で出願資格を確認する</li><li>編入年次・単位認定・卒業までの年数を比較する</li><li>入試科目と現在の学力差から必要な勉強を逆算する</li><li>第一志望だけでなく、学びの近い代替ルートも確保する</li><li>制度の情報には対象年度と確認日を必ず付ける</li></ol><div class="tag orange">入試制度は年度ごとに更新される</div>','span-5','DECISION RULES')+
+ const cards=routes.map(r=>'<article class="route-card"><div class="card-head"><span class="tag">'+esc(r.tag)+'</span><a href="'+r.url+'" target="_blank" rel="noopener">公式情報 ↗</a></div><h3>'+esc(r.name)+'</h3><div class="route-focus">'+esc(r.focus)+'</div><p>'+esc(r.route)+'</p><div class="route-fit">'+esc(r.fit)+'</div></article>').join('');
+ const advice=buildPersonalAdvice();
+ const adviceHtml='<div class="advice-panel"><div class="eyebrow">UPDATED FROM YOUR NEXO DATA</div><h3>'+esc(advice.title)+'</h3><p>'+esc(advice.body)+'</p><div class="advice-next">'+esc(advice.next)+'</div></div>';
+ const sources='<div class="source-links"><a href="https://www.sds.hit-u.ac.jp/admission/kosen/" target="_blank" rel="noopener">一橋：高専編入</a><a href="https://admissions.isct.ac.jp/ja/013/undergraduate/entrance-examination/se-transfer" target="_blank" rel="noopener">東京科学：編入学試験</a><a href="https://www.t.u-tokyo.ac.jp/study-at-utokyo/foe/transfer" target="_blank" rel="noopener">東京大学：工学部編入</a><a href="https://www.waseda.jp/inst/admission/undergraduate/application/transfer/" target="_blank" rel="noopener">早稲田：学士入学・編入</a><a href="https://www.keio.ac.jp/ja/admissions/faculty/examinations/" target="_blank" rel="noopener">慶應：入試制度一覧</a></div>';
+ app.innerHTML=pageHead('YOUR ADMISSION STRATEGY','進学戦略','大学名だけでなく、出願資格・学び・卒業後まで比較する。')+
+ '<div class="strategy-hero"><div class="eyebrow">LONG-TERM VISION</div><h2>情報・数学を武器に、経済・金融まで扱える人材へ。</h2><p>高専本科入試から、卒業後の大学編入・一般選抜まで。制度の事実と自分の希望を分けて管理する。</p></div>'+
+ '<div class="grid">'+card('今の自分へのアドバイス',adviceHtml,'span-12','PERSONAL ADVISOR')+
+ card('大学別ルート比較','<div class="route-grid">'+cards+'</div>','span-12','UNIVERSITY PATHWAYS')+
+ card('高専本科入試・今の受験対策','<div class="route-item"><h3>国立高専の学力検査</h3><p>原則5教科（国語・社会・数学・理科・英語）のマークシート方式。思考力・判断力・表現力を重視した問題も出題される。学校・学科ごとの推薦基準や配点も必ず確認。</p></div><div class="route-item"><h3>過去問・出題意図を活用</h3><p>年度別の問題・正解・解答用紙・出題意図を解き、間違いの原因を分類。数学・理科の得点力を伸ばしつつ、英語・国語・社会を落とさない。</p></div><div class="route-item"><h3>推薦と学力選抜を分けて準備</h3><p>推薦基準・面接・志望理由・調査書は志望校ごとに異なる。一般選抜の得点計画と混ぜずに管理する。</p></div><div class="source-links"><a href="https://www.kosen-k.go.jp/marksheet" target="_blank" rel="noopener">国立高専機構：入試基本情報・日程・サンプル問題</a><a href="https://www.kosen-k.go.jp/kosen_navi" target="_blank" rel="noopener">国立高専機構：入試過去問</a></div>','span-6','KOSEN ENTRANCE EXAM')+
+ card('高専から大学編入で確認すること','<ol class="strategy-list"><li>編入年次（2年次・3年次相当）と募集人数</li><li>高専の学科・卒業見込み等の出願資格</li><li>数学・専門・英語の試験内容と外部資格の扱い</li><li>口頭試問・面接・志望理由書・研究実績</li><li>単位認定、卒業までの年数、学費・生活費</li><li>募集停止・制度変更の予定と対象年度</li></ol><div class="tag orange">大学ごと・年度ごとに必ず公式要項で再確認</div>','span-6','KOSEN TRANSFER CHECKLIST')+
  card('長期アクションチェックリスト','<div class="progress-meta"><span>'+done+' / '+milestones.length+' 項目</span><b>'+Math.round(done/milestones.length*100)+'%</b></div>'+progress(done/milestones.length*100)+'<div class="list">'+milestoneHtml+'</div>','span-6','STRATEGY TRACKER')+
- card('公式情報へのリンク','<p class="muted">慶應の編入制度は学内対象の区分があるため、外部からの進学可能性を混同しない。毎年、最新の募集要項で再確認する。</p>'+sources,'span-6','PRIMARY SOURCES')+
- card('自分の進学メモ','<p class="muted">気になる大学・学部、入試方式、必要科目、疑問点、調査した日付を記録。</p><div class="field"><textarea id="strategyMemo" style="min-height:190px" placeholder="候補校：\n学びたい分野：\n入試・編入方式：\n出願資格の確認：\n必要科目・単位：\n公式URL／確認日：\n次に調べること：">'+esc(db.strategyNotes||'')+'</textarea></div><button class="btn" id="saveStrategy">戦略メモを保存</button>','span-12','PRIVATE RESEARCH NOTES')+'</div>';
+ card('調査メモ・ChatGPTで話した進路の要点','<p class="muted">進路の希望やChatGPTで話した新しい方針を短く残すと、NEXOの学習データと合わせてアドバイスに反映できる。</p><div class="field"><label>進学戦略・会話の要点</label><textarea id="strategyMemo" style="min-height:190px" placeholder="候補校・学びたい分野：\n希望する進学ルート：\nChatGPTで決めたこと：\n今の悩み・制約：\n次に確認する公式情報：">'+esc(db.strategyNotes||'')+'</textarea></div><button class="btn" id="saveStrategy">メモを保存してアドバイスを更新</button>','span-6','PERSONAL CONTEXT')+
+ card('公式情報へのリンク',sources,'span-6','PRIMARY SOURCES')+'</div>';
  app.querySelectorAll('[data-strategy-milestone]').forEach(el=>el.onchange=()=>{db.strategyMilestones[el.dataset.strategyMilestone]=el.checked;save();strategy()});
- $('#saveStrategy').onclick=()=>{db.strategyNotes=$('#strategyMemo').value;save();toast('進学戦略を保存しました')};
+ $('#saveStrategy').onclick=()=>{db.strategyNotes=$('#strategyMemo').value;save();strategy();toast('メモを保存し、アドバイスを更新しました')};
+}
+function buildPersonalAdvice(){
+ const recent=db.records.filter(x=>x.date>=new Date(Date.now()-6*86400000).toISOString().slice(0,10));
+ const total=recent.reduce((s,x)=>s+Number(x.minutes||0),0);
+ const subjects=['数学','英語','理科','社会','国語'];
+ const sums=subjects.map(s=>({s,n:recent.filter(x=>x.subject===s).reduce((a,x)=>a+Number(x.minutes||0),0)})).sort((a,b)=>a.n-b.n);
+ const plans=planFor(),pending=plans.filter(x=>!x.done);
+ let title='まずは学習の実態を記録しよう',body='学習記録が増えるほど、時間の偏りや復習の必要性を具体的に判断できる。学習したら科目・教材・時間・間違えた内容を残そう。',next='今日の学習を1件記録し、次にやる問題を1つ決める。';
+ if(total>0){
+  const weak=sums[0];
+  title=total>=600?'学習量を維持し、理解の深さを上げよう':'短時間でも毎日続け、学習のリズムを作ろう';
+  body='直近7日間の記録は合計'+total+'分。記録上もっとも時間が少ない主要科目は'+weak.s+'（'+weak.n+'分）。苦手と決めつけず、まず短い確認テストで理解度を測ろう。';
+  next=weak.s+'を20〜30分復習し、間違えた理由をノートに1つ残す。';
+ }
+ if(pending.length){next='未完了タスク「'+pending[0].name+'」を最初に片づける。その後、'+next}
+ const context=(db.strategyNotes||'').trim();
+ if(context){body+=' 保存された進路メモも考慮：'+context.slice(0,180)}
+ return {title,body,next};
 }
 function portfolio(){
  const items=db.projects||[];
