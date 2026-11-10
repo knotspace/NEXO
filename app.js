@@ -23,7 +23,7 @@ function go(p){if(!names[p])return;current=p;history.pushState({page:p},'',pageU
 function pageFromPath(){const m=location.pathname.match(/\/NEXO\/workspace\/([^/]+)\//);return m&&names[m[1]]?m[1]:'home'}
 window.addEventListener('popstate',()=>{current=pageFromPath();render()});
 current=pageFromPath();
-document.querySelector('.nav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)go(b.dataset.page)});
+document.querySelector('.nav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b){e.preventDefault();go(b.dataset.page)}});
 $('#menuToggle').onclick=()=>$('#sidebar').classList.toggle('open');
 $('#themeToggle').onclick=()=>{db.theme=db.theme==='light'?'dark':'light';document.body.classList.toggle('light',db.theme==='light');save()};
 document.body.classList.toggle('light',db.theme==='light');
